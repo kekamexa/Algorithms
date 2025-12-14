@@ -6,112 +6,110 @@
 #include "queue.h"
 
 using namespace std;
-//псевдонимы типов контейнеров ключ значение 
-typedef map<string, size_t> City_Id;// название города - его id
-typedef map<size_t, string> Id_City;// id города - его название 
-typedef map<size_t, vector<size_t>> Graph;// граф представленный в виде списка смежности
-// (вершина - вектор соседних вершин )
+
+typedef map<string, size_t> City_Id;
+typedef map<size_t, string> Id_City;
+typedef map<size_t, vector<size_t>> Graph;
+
 City_Id city_id;
 Id_City id_city;
-size_t next_id = 0; // переменная для хранения следующего доступного id города
-// функция получение id города по его названию
+size_t next_id = 0;
+
 size_t Id_get_city(const string& name) {
 
-	if (city_id.count(name) == 0) { // если города нет в мапе
+    if (city_id.count(name) == 0) {
 
-		city_id[name] = next_id; // присваиваем новый id
-		id_city[next_id] = name; // сохраняем соответствие id - название города
-		next_id++;// обновляем id для следующего города
+        city_id[name] = next_id;
+        id_city[next_id] = name;
+        next_id++;
     }
-	return city_id[name];// возвращаем id города
+    return city_id[name];
 }
-//функция поиска пути в графе с помощью поиска в ширину
+
 vector<size_t> search_puti(Graph& graph, size_t start, size_t end) {
-	vector<bool> visited(next_id, false); // вектор для отслеживания посещённых вершин
-	vector<size_t> parent(next_id, next_id); // вектор для хранения предкав для восстановления пути
+    vector<bool> visited(next_id, false);
+    vector<size_t> parent(next_id, next_id);
 
-	Queue* queue = queue_create(); // создаём очередь для поиска в ширину
-	queue_insert(queue, start); // добавляем стартовую вершину в очередь
-	visited[start] = true; // отмечаем стартовую вершину как посещённую
+    Queue* queue = queue_create();
+    queue_insert(queue, start);
+    visited[start] = true;
 
-	while (!queue_empty(queue)) { // пока очередь не пуста
+    while (!queue_empty(queue)) {
 
-		size_t vershin = queue_get(queue); // получаем вершину из головы очереди
-		queue_remove(queue); // удаляем вершину из очереди
+        size_t vershin = queue_get(queue);
+        queue_remove(queue);
 
-		if (vershin == end) // если достигли конечной вершины 
-			break; // выходим из цикла
+        if (vershin == end)
+            break;
 
-		for (size_t sosedi : graph[vershin]) { // проходим по соседним вершинам
+        for (size_t sosedi : graph[vershin]) {
 
-			if (!visited[sosedi]) { // если соседняя вершина не посещена
+            if (!visited[sosedi]) {
 
-				visited[sosedi] = true; // отмечаем её как посещённую
-				parent[sosedi] = vershin; // сохраняем предка для восстановления пути
-				queue_insert(queue, sosedi);// добавляем в очередь
+                visited[sosedi] = true;
+                parent[sosedi] = vershin;
+                queue_insert(queue, sosedi);
             }
         }
     }
 
-    queue_delete(queue);// освобождаем очередь 
+    queue_delete(queue);
 
-	if (!visited[end]) { // если конечная вершина не была посещена
-		return {}; // возвращаем пустой путь
+    if (!visited[end]) {
+        return {};
     }
 
-	vector<size_t> path; // вектор для хранения пути
-	for (size_t i = end; i != next_id; i = parent[i]) { // начиная с конечной вершины
-		path.push_back(i); // добавляем вершину в путь
+    vector<size_t> path;
+    for (size_t i = end; i != next_id; i = parent[i]) {
+        path.push_back(i);
 
-		if (i == start) // если достигли стартовой вершины
-            break; // выходим из цикла
+        if (i == start)
+            break;
     }
-	reverse(path.begin(), path.end()); // переворачиваем путь чтобы он шёл от старта к концу
+    reverse(path.begin(), path.end());
 
-	return path; // возвращаем найденный путь
+    return path;
 }
 
 int main(int argc, char** argv) {
-	(void)argc;
+    (void)argc;
 
-    ifstream file1(argv[1]); // открываем файл
-    if (!file1.is_open()){ // проверка что он открыт 
+    ifstream file1(argv[1]);
+    if (!file1.is_open()) {
         return 1;
     }
 
     Graph graph;
-	string a, b;// переменные для хранения названий городов
-	vector<pair<string, string>> Krai;// вектор для хранения пар городов (рёбра графа)
+    string a, b;
+    vector<pair<string, string>> Krai;
 
-	while (file1 >> a >> b) {// чтение пар городов из файла
-		Krai.push_back({ a, b }); // добавление пары в вектор
+    while (file1 >> a >> b) {
+        Krai.push_back({ a, b });
     }
 
     string start_name = Krai.back().first;
-	// считываем последнюю пару городов для получения стартового и конечного города
     string end_name = Krai.back().second;
-	Krai.pop_back(); // удаляем последнюю пару из вектора
+    Krai.pop_back();
 
-	for (auto& x : Krai) { // проход по всем парам городов
+    for (auto& x : Krai) {
 
-		size_t id_a = Id_get_city(x.first); // получение id первого города в паре
-		size_t id_b = Id_get_city(x.second); /// получение id второго города в паре
+        size_t id_a = Id_get_city(x.first);
+        size_t id_b = Id_get_city(x.second);
 
-		graph[id_a].push_back(id_b); // добавление ребра в граф (список смежности)
-		graph[id_b].push_back(id_a);
-	}
+        graph[id_a].push_back(id_b);
+        graph[id_b].push_back(id_a);
+    }
 
+    size_t start = Id_get_city(start_name);
+    size_t end = Id_get_city(end_name);
 
-	size_t start = Id_get_city(start_name); // получение id стартового и конечного города
-	size_t end = Id_get_city(end_name);
+    vector<size_t> path = search_puti(graph, start, end);
 
-	vector<size_t> path = search_puti(graph, start, end); // поиск пути в графе
-
-	if (path.empty()) { // если путь не найден
+    if (path.empty()) {
         cout << "No path";
     }
     else {
-		for (size_t i = 0; i < path.size(); i++) { // вывод найденного пути
+        for (size_t i = 0; i < path.size(); i++) {
 
             cout << id_city[path[i]];
             if (i + 1 < path.size())
@@ -119,6 +117,6 @@ int main(int argc, char** argv) {
         }
     }
 
-	file1.close(); // закрываем файл
-    return 0; // завершаем программу 
+    file1.close();
+    return 0;
 }

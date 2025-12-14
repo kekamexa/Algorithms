@@ -2,59 +2,59 @@
 
 struct Vector
 {
-	Data* data; //указательнь на массив данных
-	size_t size; //колличества элементов
-	size_t capacity;//вместимость массива
+    Data* data;
+    size_t size;
+    size_t capacity;
 };
 
-Vector *vector_create()
+Vector* vector_create()
 {
-    Vector* vector = new Vector; //выделение помяти под структуру
-    vector->size = 0;// указываем что вектор пустой
-	vector->capacity = 4; //начальная вместимость = 4 элемента
-	vector->data = new Data[vector->capacity]; //выделяем память под массив
-	return vector; //возвращаем указатель на созданный вектор
+    Vector* vector = new Vector;
+    vector->size = 0;
+    vector->capacity = 4;
+    vector->data = new Data[vector->capacity];
+    return vector;
 }
 
-void vector_delete(Vector *vector)
+void vector_delete(Vector* vector)
 {
     // TODO: free vector internals
-	delete[] vector->data;// освобождаем память  массива
-	delete vector; // освобождаем память структуры
+    delete[] vector->data;
+    delete vector;
 }
 
-Data vector_get(const Vector *vector, size_t index)
+Data vector_get(const Vector* vector, size_t index)
 {
-    return vector->data[index];//возвращаем элемент по индекся
+    return vector->data[index];
 }
 
-void vector_set(Vector *vector, size_t index, Data value)
+void vector_set(Vector* vector, size_t index, Data value)
 {
-	vector->data[index] = value; // присваиваем значение элементу по индексу
+    vector->data[index] = value;
 }
 
-size_t vector_size(const Vector *vector)
+size_t vector_size(const Vector* vector)
 {
-    return vector->size;// возвращаем текущее количество элементов 
+    return vector->size;
 }
 
-void vector_resize(Vector* vector, size_t size)// функция изменения размера вектора
+void vector_resize(Vector* vector, size_t size)
 {
-	if (size > vector->capacity) {// если новый размер больше текущей вместимости
+    if (size > vector->capacity) {
 
-		while (vector->capacity < size) {// увеличиваем вместимость вектора вдвое пока она не станет больше
+        while (vector->capacity < size) {
 
             vector->capacity *= 2;
         }
-		Data* new_data = new Data[vector->capacity];// выделяем память под новый массив с увеличенной вместимостью
+        Data* new_data = new Data[vector->capacity];
 
-		for (size_t i = 0; i < vector->size; i++) { // проходит по старому массиву 
+        for (size_t i = 0; i < vector->size; i++) {
 
-            new_data[i] = vector->data[i];// копирует данные в новый массив
+            new_data[i] = vector->data[i];
         }
 
-		delete[] vector->data; // освобождаем старый массив
-        vector->data = new_data; // присваеваем новый массив 
+        delete[] vector->data;
+        vector->data = new_data;
     }
-	vector->size = size; // обновляем текущее количество элементов
+    vector->size = size;
 }
